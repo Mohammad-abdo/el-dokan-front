@@ -1,0 +1,2417 @@
+{
+	"info": {
+		"_postman_id": "eldokan-api-v1",
+		"name": "Eldokan API Collection",
+		"description": "Complete API collection for Eldokan application - Pharmacy and Medical Services Platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "eldokan"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "API Root",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api",
+							"host": ["{{base_url}}"],
+							"path": ["api"]
+						},
+						"description": "Get API information and status"
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"john_doe\",\n    \"phone\": \"+201234567890\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login (Phone)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+201234567890\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login (Email)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@eldokan.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Social Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"google\",\n    \"provider_id\": \"google_user_id_123\",\n    \"email\": \"user@gmail.com\",\n    \"name\": \"John Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/social-login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "social-login"]
+						}
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+201234567890\",\n    \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "verify-otp"]
+						}
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+201234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/resend-otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "resend-otp"]
+						}
+					}
+				},
+				{
+					"name": "Guest Login",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/guest-login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "guest-login"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"oldpassword123\",\n    \"new_password\": \"newpassword123\",\n    \"new_password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/change-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "Login with Link",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"link\": \"prescription_link_token\",\n    \"phone\": \"+201234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login-with-link",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login-with-link"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Public Endpoints",
+			"item": [
+				{
+					"name": "Home",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/home",
+							"host": ["{{base_url}}"],
+							"path": ["api", "home"]
+						}
+					}
+				},
+				{
+					"name": "Get Shops",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shops",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shops"]
+						}
+					}
+				},
+				{
+					"name": "Get Shop Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shops/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shops", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products"]
+						}
+					}
+				},
+				{
+					"name": "Get Product Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1"]
+						}
+					}
+				},
+				{
+					"name": "Filter Products",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_id\": 1,\n    \"shop_id\": 1,\n    \"min_price\": 10,\n    \"max_price\": 100,\n    \"search\": \"medicine\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products/filter",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "filter"]
+						}
+					}
+				},
+				{
+					"name": "Get Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Category Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Subcategories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/subcategories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subcategories"]
+						}
+					}
+				},
+				{
+					"name": "Get Sliders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sliders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sliders"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. User",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"date_of_birth\": \"1990-01-01\",\n    \"gender\": \"male\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Get Wallet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user/wallet",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "wallet"]
+						}
+					}
+				},
+				{
+					"name": "Top Up Wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 100.00,\n    \"payment_method\": \"credit_card\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/wallet/top-up",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user", "wallet", "top-up"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Addresses",
+			"item": [
+				{
+					"name": "Get Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/addresses",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses"]
+						}
+					}
+				},
+				{
+					"name": "Create Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"detailed_address\": \"123 Main Street\",\n    \"city\": \"Cairo\",\n    \"district\": \"Nasr City\",\n    \"latitude\": 30.0626,\n    \"longitude\": 31.2497,\n    \"is_default\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/addresses",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses"]
+						}
+					}
+				},
+				{
+					"name": "Get Address",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/addresses/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"detailed_address\": \"456 Updated Street\",\n    \"city\": \"Cairo\",\n    \"district\": \"Heliopolis\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/addresses/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/addresses/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses", "1"]
+						}
+					}
+				},
+				{
+					"name": "Set Default Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/addresses/1/set-default",
+							"host": ["{{base_url}}"],
+							"path": ["api", "addresses", "1", "set-default"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Cart",
+			"item": [
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart"]
+						}
+					}
+				},
+				{
+					"name": "Add to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cart/add",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "add"]
+						}
+					}
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cart/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "1"]
+						}
+					}
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "1"]
+						}
+					}
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Orders",
+			"item": [
+				{
+					"name": "Get Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"]
+						}
+					}
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_id\": 1,\n    \"payment_method\": \"wallet\",\n    \"delivery_fee\": 10.00,\n    \"notes\": \"Please deliver before 5 PM\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"]
+						}
+					}
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Track Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/track",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "track"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "Get Orders by Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/status/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "status", "pending"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Prescriptions",
+			"item": [
+				{
+					"name": "Upload Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "notes",
+									"value": "Please process this prescription",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "prescriptions", "upload"]
+						}
+					}
+				},
+				{
+					"name": "Get Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "prescriptions"]
+						}
+					}
+				},
+				{
+					"name": "Get Prescription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "prescriptions", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Prescriptions by Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/status/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "prescriptions", "status", "pending"]
+						}
+					}
+				},
+				{
+					"name": "View Prescription by Link",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/prescriptions/link/abc123",
+							"host": ["{{base_url}}"],
+							"path": ["api", "prescriptions", "link", "abc123"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Medication Reminders",
+			"item": [
+				{
+					"name": "Get Reminders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders"]
+						}
+					}
+				},
+				{
+					"name": "Create Reminder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"medication_name\": \"Aspirin\",\n    \"dosage\": \"100mg\",\n    \"frequency\": \"daily\",\n    \"time\": \"09:00\",\n    \"start_date\": \"2024-01-01\",\n    \"end_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reminders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders"]
+						}
+					}
+				},
+				{
+					"name": "Get Reminder",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Reminder",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"time\": \"10:00\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Reminder",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Toggle Reminder",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1/toggle",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reminders", "1", "toggle"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Doctors",
+			"item": [
+				{
+					"name": "Get Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors"]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor Availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/1/availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", "1", "availability"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Bookings",
+			"item": [
+				{
+					"name": "Get Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctor_id\": 1,\n    \"date\": \"2024-01-15\",\n    \"time\": \"10:00\",\n    \"type\": \"consultation\",\n    \"notes\": \"Regular checkup\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "Get Booking",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings", "1"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/1/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings", "1", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "Rate Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"comment\": \"Excellent service\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/1/rate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings", "1", "rate"]
+						}
+					}
+				},
+				{
+					"name": "Submit Complaint",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"complaint\": \"Issue with booking\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bookings/1/complaint",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings", "1", "complaint"]
+						}
+					}
+				},
+				{
+					"name": "Get Bookings by Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/bookings/status/confirmed",
+							"host": ["{{base_url}}"],
+							"path": ["api", "bookings", "status", "confirmed"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Delivery",
+			"item": [
+				{
+					"name": "Track Delivery",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1/track",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deliveries", "1", "track"]
+						}
+					}
+				},
+				{
+					"name": "Get Driver Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1/driver",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deliveries", "1", "driver"]
+						}
+					}
+				},
+				{
+					"name": "Contact Driver",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1/contact-driver",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deliveries", "1", "contact-driver"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Delivery",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1/confirm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deliveries", "1", "confirm"]
+						}
+					}
+				},
+				{
+					"name": "Get Delivery Map",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1/map",
+							"host": ["{{base_url}}"],
+							"path": ["api", "deliveries", "1", "map"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Payment",
+			"item": [
+				{
+					"name": "Process Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"payment_method\": \"credit_card\",\n    \"amount\": 150.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payments/process",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payments", "process"]
+						}
+					}
+				},
+				{
+					"name": "Get Payment Methods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payments/methods",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payments", "methods"]
+						}
+					}
+				},
+				{
+					"name": "Apply Discount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"coupon_code\": \"SAVE10\",\n    \"order_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payments/apply-discount",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payments", "apply-discount"]
+						}
+					}
+				},
+				{
+					"name": "Get Payment History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payments/history",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payments", "history"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Notifications",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications"]
+						}
+					}
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/unread-count",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "unread-count"]
+						}
+					}
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/1/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "1", "read"]
+						}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/read-all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "read-all"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "14. Messages",
+			"item": [
+				{
+					"name": "Get Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "messages"]
+						}
+					}
+				},
+				{
+					"name": "Get Conversation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages/1/conversation",
+							"host": ["{{base_url}}"],
+							"path": ["api", "messages", "1", "conversation"]
+						}
+					}
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"receiver_id\": 2,\n    \"message\": \"Hello, how are you?\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "messages"]
+						}
+					}
+				},
+				{
+					"name": "Send Voice Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "receiver_id",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "voice",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/messages/voice",
+							"host": ["{{base_url}}"],
+							"path": ["api", "messages", "voice"]
+						}
+					}
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/messages/1/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "messages", "1", "read"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "15. Settings",
+			"item": [
+				{
+					"name": "Get Settings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/settings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "settings"]
+						}
+					}
+				},
+				{
+					"name": "Update Settings",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"language\": \"ar\",\n    \"notifications_enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/settings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "settings"]
+						}
+					}
+				},
+				{
+					"name": "Get Support Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/support",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "16. Ratings",
+			"item": [
+				{
+					"name": "Get Ratings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/ratings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "ratings"]
+						}
+					}
+				},
+				{
+					"name": "Create Rating",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rateable_type\": \"App\\\\Models\\\\Product\",\n    \"rateable_id\": 1,\n    \"rating\": 5,\n    \"comment\": \"Great product!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ratings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "ratings"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "17. Coupons",
+			"item": [
+				{
+					"name": "Validate Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SAVE10\",\n    \"order_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/coupons/validate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "coupons", "validate"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "18. Support Tickets",
+			"item": [
+				{
+					"name": "Get Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/support/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "tickets"]
+						}
+					}
+				},
+				{
+					"name": "Create Ticket",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subject\": \"Order Issue\",\n    \"message\": \"I have an issue with my order\",\n    \"priority\": \"high\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/support/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "tickets"]
+						}
+					}
+				},
+				{
+					"name": "Get Ticket",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/support/tickets/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "tickets", "1"]
+						}
+					}
+				},
+				{
+					"name": "Add Message to Ticket",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"Additional information about the issue\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/support/tickets/1/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "tickets", "1", "messages"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "19. Maps",
+			"item": [
+				{
+					"name": "Get Medical Centers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/maps/medical-centers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "maps", "medical-centers"]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor Clinics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/maps/doctors/1/clinics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "maps", "doctors", "1", "clinics"]
+						}
+					}
+				},
+				{
+					"name": "Calculate Distance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/maps/calculate-distance?from_lat=30.0626&from_lng=31.2497&to_lat=30.0444&to_lng=31.2357",
+							"host": ["{{base_url}}"],
+							"path": ["api", "maps", "calculate-distance"],
+							"query": [
+								{
+									"key": "from_lat",
+									"value": "30.0626"
+								},
+								{
+									"key": "from_lng",
+									"value": "31.2497"
+								},
+								{
+									"key": "to_lat",
+									"value": "30.0444"
+								},
+								{
+									"key": "to_lng",
+									"value": "31.2357"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "20. Doctor Panel",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Get Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "Get Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/patients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "patients"]
+						}
+					}
+				},
+				{
+					"name": "Get Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/prescriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "prescriptions"]
+						}
+					}
+				},
+				{
+					"name": "Create Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": 1,\n    \"diagnosis\": \"Common cold\",\n    \"notes\": \"Take medication as prescribed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/prescriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "prescriptions"]
+						}
+					}
+				},
+				{
+					"name": "Share Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/prescriptions/1/share",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "prescriptions", "1", "share"]
+						}
+					}
+				},
+				{
+					"name": "Get Wallet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/wallet",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "wallet"]
+						}
+					}
+				},
+				{
+					"name": "Get Wallet Transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/wallet/transactions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "wallet", "transactions"]
+						}
+					}
+				},
+				{
+					"name": "Get Medical Centers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/medical-centers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "medical-centers"]
+						}
+					}
+				},
+				{
+					"name": "Add Medical Center",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"medical_center_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctor/medical-centers/add",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "medical-centers", "add"]
+						}
+					}
+				},
+				{
+					"name": "Get Chat Conversations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctor/chat/conversations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctor", "chat", "conversations"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "21. Representative Panel",
+			"item": [
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{representative_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/representative/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "representative", "products"]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{representative_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Product\",\n    \"description\": \"Product description\",\n    \"price\": 50.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/representative/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "representative", "products"]
+						}
+					}
+				},
+				{
+					"name": "Get Visits",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{representative_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/representative/visits",
+							"host": ["{{base_url}}"],
+							"path": ["api", "representative", "visits"]
+						}
+					}
+				},
+				{
+					"name": "Create Visit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{representative_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shop_id\": 1,\n    \"date\": \"2024-01-15\",\n    \"notes\": \"Visit notes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/representative/visits",
+							"host": ["{{base_url}}"],
+							"path": ["api", "representative", "visits"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "22. Admin Panel",
+			"item": [
+				{
+					"name": "Sliders",
+					"item": [
+						{
+							"name": "Get Sliders",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/sliders",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "sliders"]
+								}
+							}
+						},
+						{
+							"name": "Create Slider",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"New Slider\",\n    \"image\": \"slider.jpg\",\n    \"link\": \"https://example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/sliders",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "sliders"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "Get Users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users"]
+								}
+							}
+						},
+						{
+							"name": "Suspend User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users/1/suspend",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users", "1", "suspend"]
+								}
+							}
+						},
+						{
+							"name": "Activate User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users/1/activate",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users", "1", "activate"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{
+							"name": "Get Orders",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/orders",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "orders"]
+								}
+							}
+						},
+						{
+							"name": "Update Order Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"shipped\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/orders/1/status",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "orders", "1", "status"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Financial",
+					"item": [
+						{
+							"name": "Dashboard",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/financial/dashboard",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "financial", "dashboard"]
+								}
+							}
+						},
+						{
+							"name": "Get Transactions",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/financial/transactions",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "financial", "transactions"]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctor_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "representative_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

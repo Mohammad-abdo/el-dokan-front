@@ -1,0 +1,130 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DataTable } from '@/components/DataTable';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import api from '@/lib/api';
+import { extractDataFromResponse } from '@/lib/apiHelper';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Plus, Edit, Eye, MoreHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
+import { format } from 'date-fns';
+
+export default function AdminCoupons() {
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    setFetchError(null);
+    try {
+      const response = await api.get('/admin/coupons');
+      setCoupons(extractDataFromResponse(response));
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+      setCoupons([]);
+      setFetchError(error.response?.data?.message || 'Failed to load coupons.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const columns = useMemo(() => [
+    { accessorKey: 'id', header: t('common_labels.id') },
+    { accessorKey: 'code', header: 'Code' },
+    { 
+      accessorKey: 'discount', 
+      header: 'Discount', 
+      cell: ({ row }) => {
+        const discount = row.original.discount || row.original.discount_percentage;
+        return `${discount}%`;
+      }
+    },
+    { 
+      accessorKey: 'expires_at', 
+      header: 'Expires', 
+      cell: ({ row }) => row.original.expires_at ? format(new Date(row.original.expires_at), 'MMM dd, yyyy') : '-' 
+    },
+    {
+      id: 'actions',
+      header: t('common_labels.action'),
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => navigate(`/admin/coupons/${row.original.id}`)}>
+              <Eye className="mr-2 h-4 w-4" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate(`/admin/coupons/${row.original.id}/edit`)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ], [navigate, t]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{t('sidebar.coupons')}</h1>
+              <p className="text-muted-foreground mt-1">Manage discount coupons</p>
+            </div>
+            <Button onClick={() => navigate('/admin/coupons/new')}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('common_labels.create')} {t('sidebar.coupons')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {fetchError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t('common_labels.error') || 'Error'}</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center gap-2">
+            <span>{fetchError}</span>
+            <Button variant="outline" size="sm" onClick={fetchCoupons} className="gap-1">
+              <RefreshCw className="h-3 w-3" />
+              {t('common_labels.retry') || 'Retry'}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <DataTable
+        columns={columns}
+        data={coupons}
+        searchable
+        searchPlaceholder={t('common_labels.search') + ' ' + t('sidebar.coupons') + '...'}
+        loading={loading}
+        emptyTitle="No coupons found."
+        emptyDescription="Create a coupon to get started."
+      />
+    </div>
+  );
+}
+
+
