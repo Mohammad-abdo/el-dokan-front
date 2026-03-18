@@ -9,7 +9,7 @@ import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
 import NoDashboard from "./pages/NoDashboard";
 
-// Admin Pages
+// Admin Pagesghfh
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCategoryDetail from "./pages/admin/AdminCategoryDetail";
