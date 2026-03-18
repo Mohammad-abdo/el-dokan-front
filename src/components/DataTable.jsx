@@ -128,7 +128,7 @@ export function DataTable({
                 className="relative"
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Filters
+                {isRTL ? 'الفلاتر' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
                     {activeFiltersCount}
@@ -138,14 +138,15 @@ export function DataTable({
             </motion.div>
           )}
 
-          {exportable && onExport && (
+          {/* زر استخراج التقرير معطّل — الاستخراج فقط من نظام التقارير الظاهر في الصفحة (بدون modal) */}
+          {false && exportable && onExport && (
             <Button
               variant="outline"
               onClick={onExport}
               className="gap-2"
             >
               <Download className="w-4 h-4" />
-              Export
+              {isRTL ? 'استخراج التقرير' : 'Export Report'}
             </Button>
           )}
         </div>

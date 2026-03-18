@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import showToast from '@/lib/toast';
 import { showConfirm } from '@/components/ConfirmDialog';
+import { TableReportExportCard } from '@/components/TableReportExportCard';
 import { MoreHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function AdminDrivers() {
@@ -124,11 +125,16 @@ export default function AdminDrivers() {
     {
       accessorKey: 'status',
       header: language === 'ar' ? 'الحالة' : 'Status',
+      getExportValue: (row) => {
+        const statusConfig = { available: language === 'ar' ? 'متاح' : 'Available', busy: language === 'ar' ? 'مشغول' : 'Busy', offline: language === 'ar' ? 'غير متصل' : 'Offline' };
+        return statusConfig[row.status] || row.status || '—';
+      },
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
       accessorKey: 'rating',
       header: language === 'ar' ? 'التقييم' : 'Rating',
+      getExportValue: (row) => (typeof row.rating === 'number' ? row.rating.toFixed(1) : '0.0'),
       cell: ({ row }) => {
         const rating = row.original.rating;
         const ratingValue = typeof rating === 'number' ? rating.toFixed(1) : '0.0';
@@ -143,6 +149,7 @@ export default function AdminDrivers() {
     {
       accessorKey: 'location',
       header: language === 'ar' ? 'الموقع' : 'Location',
+      getExportValue: (row) => (row.current_location_lat && row.current_location_lng) ? (language === 'ar' ? 'على الخريطة' : 'On Map') : (language === 'ar' ? 'غير متاح' : 'N/A'),
       cell: ({ row }) => {
         const hasLocation = row.original.current_location_lat && row.original.current_location_lng;
         return (
@@ -260,6 +267,8 @@ export default function AdminDrivers() {
         </CardContent>
       </Card>
 
+      <TableReportExportCard reportKey="drivers" data={filteredData} columns={columns} />
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -331,8 +340,6 @@ export default function AdminDrivers() {
         loading={loading}
         emptyTitle={language === 'ar' ? 'لا يوجد سائقون' : 'No drivers found.'}
         emptyDescription={language === 'ar' ? 'أضف سائقاً أو عدّل الفلاتر.' : 'Add a driver or adjust your filters.'}
-        exportable
-        onExport={() => console.log('Export drivers')}
       />
     </div>
   );

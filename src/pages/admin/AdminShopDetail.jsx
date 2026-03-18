@@ -89,8 +89,9 @@ export default function AdminShopDetail() {
   const [docForm, setDocForm] = useState({ type: 'permit', title: '', title_ar: '', reference_number: '', expires_at: '' });
   const [docFile, setDocFile] = useState(null);
   const [repFormOpen, setRepFormOpen] = useState(false);
-  const [repForm, setRepForm] = useState({ user_id: '', territory: '', status: 'active' });
-  const [usersList, setUsersList] = useState([]);
+  const [repForm, setRepForm] = useState({ name: '', territory: '', status: 'active', monthly_target: '', commission_percentage: '' });
+  const [repEditOpen, setRepEditOpen] = useState(false);
+  const [repEditForm, setRepEditForm] = useState({ id: null, monthly_target: '', commission_percentage: '' });
   const [companyVisits, setCompanyVisits] = useState({ data: [], pagination: null });
   const [companyVisitsLoading, setCompanyVisitsLoading] = useState(false);
   const [companyOrders, setCompanyOrders] = useState({ data: [], pagination: null });
@@ -201,14 +202,6 @@ export default function AdminShopDetail() {
     }
   };
 
-  useEffect(() => {
-    if (repFormOpen) {
-      api.get('/admin/users', { params: { per_page: 200 } }).then((r) => {
-        const list = r.data?.data?.data ?? r.data?.data ?? [];
-        setUsersList(Array.isArray(list) ? list : []);
-      }).catch(() => setUsersList([]));
-    }
-  }, [repFormOpen]);
 
   const fetchCompanyVisits = async (page = 1) => {
     if (!id) return;
@@ -226,19 +219,60 @@ export default function AdminShopDetail() {
     }
   };
 
+  const handleUpdateRepTargetCommission = async () => {
+    if (!repEditForm.id) return;
+    try {
+      await api.put(`/admin/representatives/${repEditForm.id}`, {
+        monthly_target: repEditForm.monthly_target === '' ? null : parseFloat(repEditForm.monthly_target),
+        commission_percentage: repEditForm.commission_percentage === '' ? null : parseFloat(repEditForm.commission_percentage),
+      });
+      showToast.success(language === 'ar' ? 'تم تحديث الهدف والعمولة' : 'Target and commission updated');
+      setRepEditOpen(false);
+      setRepEditForm({ id: null, monthly_target: '', commission_percentage: '' });
+      fetchShop();
+    } catch (e) {
+      showToast.error(e.response?.data?.message || (language === 'ar' ? 'فشل التحديث' : 'Update failed'));
+    }
+  };
+
   const handleAddRepresentative = async () => {
-    if (!repForm.user_id || !repForm.territory?.trim()) {
-      showToast.error(language === 'ar' ? 'أدخل المستخدم والمنطقة' : 'Enter user and territory');
+    const nameTrimmed = repForm.name?.trim();
+    if (!nameTrimmed) {
+      showToast.error(language === 'ar' ? 'يجب كتابة اسم المندوب' : 'Enter the representative name');
+      return;
+    }
+    if (!repForm.territory?.trim()) {
+      showToast.error(language === 'ar' ? 'أدخل المنطقة' : 'Enter territory');
+      return;
+    }
+    const existingRep = (shop?.representatives || []).find((r) => {
+      const existingName = (r.user?.name || r.user?.username || r.user?.email || '').toString().trim().toLowerCase();
+      return existingName === nameTrimmed.toLowerCase();
+    });
+    if (existingRep) {
+      showToast.error(language === 'ar' ? 'الاسم مكتوب سابقاً — هذا المندوب مضاف لهذه الشركة بالفعل' : 'This name is already added as a representative for this company');
       return;
     }
     try {
-      await api.post(`/admin/shops/${id}/representatives`, repForm);
+      const payload = {
+        name: nameTrimmed,
+        territory: repForm.territory.trim(),
+        status: repForm.status,
+        monthly_target: repForm.monthly_target === '' ? undefined : parseFloat(repForm.monthly_target),
+        commission_percentage: repForm.commission_percentage === '' ? undefined : parseFloat(repForm.commission_percentage),
+      };
+      await api.post(`/admin/shops/${id}/representatives`, payload);
       showToast.success(language === 'ar' ? 'تم إضافة المندوب' : 'Representative added');
       setRepFormOpen(false);
-      setRepForm({ user_id: '', territory: '', status: 'active' });
+      setRepForm({ name: '', territory: '', status: 'active', monthly_target: '', commission_percentage: '' });
       fetchShop();
     } catch (e) {
-      showToast.error(e.response?.data?.message || (language === 'ar' ? 'فشل' : 'Failed'));
+      const msg = e.response?.data?.message;
+      if (msg && typeof msg === 'string' && msg.includes('already added')) {
+        showToast.error(language === 'ar' ? 'الاسم مكتوب سابقاً — هذا المندوب مضاف لهذه الشركة بالفعل' : msg);
+      } else {
+        showToast.error(msg || (language === 'ar' ? 'فشل الإضافة' : 'Failed'));
+      }
     }
   };
 
@@ -1431,20 +1465,50 @@ export default function AdminShopDetail() {
               {(shop.representatives || []).length === 0 ? (
                 <p className="text-center py-12 text-muted-foreground">{language === 'ar' ? 'لا يوجد مندوبون بعد' : 'No representatives yet'}</p>
               ) : (
-                <ul className="space-y-3">
-                  {(shop.representatives || []).map((r) => (
-                    <li key={r.id} className="flex items-center justify-between rounded-lg border p-4">
-                      <div>
-                        <p className="font-medium">{r.user?.username || r.user?.email || r.user?.name || `#${r.id}`}</p>
-                        <p className="text-sm text-muted-foreground">{r.territory || '-'}</p>
-                        <Badge variant={r.status === 'active' ? 'default' : 'secondary'} className="mt-1">{r.status || '-'}</Badge>
-                      </div>
-                      <Button variant="ghost" size="sm" className="text-destructive" onClick={() => showConfirm(language === 'ar' ? 'إزالة المندوب من هذه الشركة؟' : 'Remove representative from this company?', () => api.delete(`/admin/representatives/${r.id}`).then(() => { showToast.success(language === 'ar' ? 'تم الحذف' : 'Deleted'); fetchShop(); }).catch((e) => showToast.error(e.response?.data?.message)))}>
-                        {language === 'ar' ? 'إزالة' : 'Remove'}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-3 font-semibold">{language === 'ar' ? 'المندوب' : 'Representative'}</th>
+                        <th className="text-left p-3 font-semibold">{language === 'ar' ? 'المنطقة' : 'Territory'}</th>
+                        {fromCompanies && (
+                          <>
+                            <th className="text-left p-3 font-semibold">{language === 'ar' ? 'الهدف الشهري' : 'Monthly target'}</th>
+                            <th className="text-left p-3 font-semibold">{language === 'ar' ? 'نسبة العمولة %' : 'Commission %'}</th>
+                          </>
+                        )}
+                        <th className="text-right p-3 font-semibold">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(shop.representatives || []).map((r) => (
+                        <tr key={r.id} className="border-b hover:bg-muted/30">
+                          <td className="p-3">
+                            <p className="font-medium">{r.user?.username || r.user?.email || r.user?.name || `#${r.id}`}</p>
+                            <Badge variant={r.status === 'active' ? 'default' : 'secondary'} className="mt-1">{r.status || '-'}</Badge>
+                          </td>
+                          <td className="p-3 text-muted-foreground">{r.territory || '-'}</td>
+                          {fromCompanies && (
+                            <>
+                              <td className="p-3">{r.monthly_target != null ? Number(r.monthly_target).toLocaleString() : '—'}</td>
+                              <td className="p-3">{r.commission_percentage != null ? `${Number(r.commission_percentage)}%` : '—'}</td>
+                            </>
+                          )}
+                          <td className="p-3 text-right">
+                            {fromCompanies && (
+                              <Button variant="ghost" size="sm" className="mr-2" onClick={() => { setRepEditForm({ id: r.id, monthly_target: r.monthly_target ?? '', commission_percentage: r.commission_percentage ?? '' }); setRepEditOpen(true); }}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => showConfirm(language === 'ar' ? 'إزالة المندوب من هذه الشركة؟' : 'Remove representative from this company?', () => api.delete(`/admin/representatives/${r.id}`).then(() => { showToast.success(language === 'ar' ? 'تم الحذف' : 'Deleted'); fetchShop(); }).catch((e) => showToast.error(e.response?.data?.message)))}>
+                              {language === 'ar' ? 'إزالة' : 'Remove'}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -1801,13 +1865,8 @@ export default function AdminShopDetail() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label>{language === 'ar' ? 'المستخدم' : 'User'} *</Label>
-              <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={repForm.user_id} onChange={(e) => setRepForm((f) => ({ ...f, user_id: e.target.value }))}>
-                <option value="">{language === 'ar' ? 'اختر مستخدم' : 'Select user'}</option>
-                {usersList.map((u) => (
-                  <option key={u.id} value={u.id}>{u.username || u.email || u.name || `#${u.id}`}</option>
-                ))}
-              </select>
+              <Label>{language === 'ar' ? 'اسم المندوب' : 'Representative name'} *</Label>
+              <Input value={repForm.name} onChange={(e) => setRepForm((f) => ({ ...f, name: e.target.value }))} placeholder={language === 'ar' ? 'اكتب الاسم — إن لم يكن مسجلاً سيتم إنشاء حساب له' : 'Type the name — if not registered, an account will be created'} />
             </div>
             <div>
               <Label>{language === 'ar' ? 'المنطقة / الإقليم' : 'Territory'} *</Label>
@@ -1821,10 +1880,45 @@ export default function AdminShopDetail() {
                 <option value="suspended">{language === 'ar' ? 'موقوف' : 'Suspended'}</option>
               </select>
             </div>
+            {fromCompanies && (
+              <>
+                <div>
+                  <Label>{language === 'ar' ? 'الهدف الشهري (مبيعات)' : 'Monthly target (sales)'}</Label>
+                  <Input type="number" min="0" step="0.01" value={repForm.monthly_target} onChange={(e) => setRepForm((f) => ({ ...f, monthly_target: e.target.value }))} placeholder={language === 'ar' ? 'مثال: 50000' : 'e.g. 50000'} />
+                </div>
+                <div>
+                  <Label>{language === 'ar' ? 'نسبة العمولة %' : 'Commission %'}</Label>
+                  <Input type="number" min="0" max="100" step="0.01" value={repForm.commission_percentage} onChange={(e) => setRepForm((f) => ({ ...f, commission_percentage: e.target.value }))} placeholder={language === 'ar' ? 'مثال: 5' : 'e.g. 5'} />
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRepFormOpen(false)}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
             <Button onClick={handleAddRepresentative}>{language === 'ar' ? 'إضافة' : 'Add'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit representative target & commission (company only) */}
+      <Dialog open={repEditOpen} onOpenChange={setRepEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'تحديد الهدف الشهري ونسبة العمولة' : 'Set monthly target & commission'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>{language === 'ar' ? 'الهدف الشهري (مبيعات)' : 'Monthly target (sales)'}</Label>
+              <Input type="number" min="0" step="0.01" value={repEditForm.monthly_target} onChange={(e) => setRepEditForm((f) => ({ ...f, monthly_target: e.target.value }))} placeholder={language === 'ar' ? 'مثال: 50000' : 'e.g. 50000'} />
+            </div>
+            <div>
+              <Label>{language === 'ar' ? 'نسبة العمولة %' : 'Commission %'}</Label>
+              <Input type="number" min="0" max="100" step="0.01" value={repEditForm.commission_percentage} onChange={(e) => setRepEditForm((f) => ({ ...f, commission_percentage: e.target.value }))} placeholder={language === 'ar' ? 'مثال: 5' : 'e.g. 5'} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRepEditOpen(false)}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
+            <Button onClick={handleUpdateRepTargetCommission}>{language === 'ar' ? 'حفظ' : 'Save'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

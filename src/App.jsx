@@ -65,9 +65,13 @@ import AdminDeliveryTracking from "./pages/admin/AdminDeliveryTracking";
 import AdminVendors from "./pages/admin/AdminVendors";
 import AdminFileUploads from "./pages/admin/AdminFileUploads";
 import AdminVisits from "./pages/admin/AdminVisits";
+import AdminVisitCreate from "./pages/admin/AdminVisitCreate";
+import AdminVisitDetail from "./pages/admin/AdminVisitDetail";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminMessageConversation from "./pages/admin/AdminMessageConversation";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -500,6 +504,26 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/admin/messages/conversation/:user1/:user2"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminMessageConversation />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/messages"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminMessages />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin/support"
         element={
           <ProtectedRoute requireAdmin>
@@ -695,6 +719,26 @@ function AppRoutes() {
           <ProtectedRoute requireAdmin>
             <AdminLayout>
               <AdminVisits />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/visits/create"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminVisitCreate />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/visits/:id"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminVisitDetail />
             </AdminLayout>
           </ProtectedRoute>
         }

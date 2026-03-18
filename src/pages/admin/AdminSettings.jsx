@@ -109,7 +109,12 @@ export default function AdminSettings() {
     try {
       const response = await api.get("/admin/settings");
       const settingsData = response.data?.data || response.data || {};
-      setSettings((prev) => ({ ...prev, ...settingsData }));
+      const normalized = {};
+      Object.keys(settingsData).forEach((k) => {
+        const v = settingsData[k];
+        normalized[k] = v === null || v === undefined ? "" : String(v);
+      });
+      setSettings((prev) => ({ ...prev, ...normalized }));
       if (settingsData.site_logo) {
         setLogoPreview(settingsData.site_logo);
       }
@@ -148,6 +153,8 @@ export default function AdminSettings() {
       if (url) {
         setSettings((prev) => ({ ...prev, site_logo: url }));
         setLogoPreview(url);
+        localStorage.setItem("site_logo", url);
+        window.dispatchEvent(new CustomEvent("site-settings-updated"));
         showToast.success(language === "ar" ? "تم رفع الشعار" : "Logo uploaded");
       }
     } catch (err) {
@@ -188,6 +195,10 @@ export default function AdminSettings() {
     setSaving(true);
     try {
       await api.put("/admin/settings", settings);
+      if (settings.site_logo) {
+        localStorage.setItem("site_logo", settings.site_logo);
+        window.dispatchEvent(new CustomEvent("site-settings-updated"));
+      }
       showToast.success(
         language === "ar"
           ? "تم حفظ الإعدادات بنجاح"
@@ -308,7 +319,7 @@ export default function AdminSettings() {
                   {language === "ar" ? "خط النص" : "Font Family"}
                 </label>
                 <select
-                  value={fontFamily}
+                  value={fontFamily ?? ""}
                   onChange={(e) => setFontFamily(e.target.value)}
                   className="w-full p-2 border rounded-lg bg-background"
                 >
@@ -437,7 +448,7 @@ export default function AdminSettings() {
                 </div>
                 <Input
                   name="site_logo"
-                  value={settings.site_logo}
+                  value={settings.site_logo ?? ""}
                   onChange={handleChange}
                   placeholder="https://example.com/logo.png"
                   className="mt-2"
@@ -484,7 +495,7 @@ export default function AdminSettings() {
                 </div>
                 <Input
                   name="site_favicon"
-                  value={settings.site_favicon}
+                  value={settings.site_favicon ?? ""}
                   onChange={handleChange}
                   placeholder="https://example.com/favicon.ico"
                   className="mt-2"
@@ -523,7 +534,7 @@ export default function AdminSettings() {
                   </label>
                   <Input
                     name="site_name"
-                    value={settings.site_name}
+                    value={settings.site_name ?? ""}
                     onChange={handleChange}
                     placeholder="El Dokan"
                   />
@@ -535,7 +546,7 @@ export default function AdminSettings() {
                   <Input
                     name="site_email"
                     type="email"
-                    value={settings.site_email}
+                    value={settings.site_email ?? ""}
                     onChange={handleChange}
                     placeholder="admin@eldokan.com"
                   />
@@ -546,7 +557,7 @@ export default function AdminSettings() {
                   </label>
                   <Input
                     name="site_phone"
-                    value={settings.site_phone}
+                    value={settings.site_phone ?? ""}
                     onChange={handleChange}
                     placeholder="+1234567890"
                   />
@@ -557,7 +568,7 @@ export default function AdminSettings() {
                   </label>
                   <Input
                     name="site_address"
-                    value={settings.site_address}
+                    value={settings.site_address ?? ""}
                     onChange={handleChange}
                     placeholder="123 Main St, City, Country"
                   />

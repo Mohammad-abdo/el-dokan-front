@@ -14,10 +14,13 @@ import {
 import api from '@/lib/api';
 import { extractDataFromResponse } from '@/lib/apiHelper';
 import showToast from '@/lib/toast';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { TableReportExportCard } from '@/components/TableReportExportCard';
 import { Plus, Eye, UserCheck, UserX, Wallet, MoreHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function AdminDoctors() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -70,7 +73,9 @@ export default function AdminDoctors() {
     },
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: language === 'ar' ? 'الاسم' : 'Name',
+      headerAr: 'الاسم',
+      getExportValue: (row) => row.name || row.fullName || row.user?.name || row.user?.username || '-',
       cell: ({ row }) => {
         const doctor = row.original;
         return doctor.name || doctor.fullName || doctor.user?.name || doctor.user?.username || '-';
@@ -78,7 +83,9 @@ export default function AdminDoctors() {
     },
     {
       accessorKey: 'email',
-      header: 'Email',
+      header: language === 'ar' ? 'البريد' : 'Email',
+      headerAr: 'البريد',
+      getExportValue: (row) => row.email || row.user?.email || '-',
       cell: ({ row }) => {
         const doctor = row.original;
         return doctor.email || doctor.user?.email || '-';
@@ -86,7 +93,9 @@ export default function AdminDoctors() {
     },
     {
       accessorKey: 'phone',
-      header: 'Phone',
+      header: language === 'ar' ? 'الهاتف' : 'Phone',
+      headerAr: 'الهاتف',
+      getExportValue: (row) => row.phone || row.user?.phone || '-',
       cell: ({ row }) => {
         const doctor = row.original;
         return doctor.phone || doctor.user?.phone || '-';
@@ -94,7 +103,9 @@ export default function AdminDoctors() {
     },
     {
       accessorKey: 'specialty',
-      header: 'Specialty',
+      header: language === 'ar' ? 'التخصص' : 'Specialty',
+      headerAr: 'التخصص',
+      getExportValue: (row) => row.specialty || row.specialization || '-',
       cell: ({ row }) => {
         const doctor = row.original;
         return doctor.specialty || doctor.specialization || '-';
@@ -102,7 +113,9 @@ export default function AdminDoctors() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: language === 'ar' ? 'الحالة' : 'Status',
+      headerAr: 'الحالة',
+      getExportValue: (row) => row.status || 'active',
       cell: ({ row }) => {
         const status = row.original.status || 'active';
         return (
@@ -150,7 +163,25 @@ export default function AdminDoctors() {
         </DropdownMenu>
       ),
     },
-  ], [navigate, handleActivate, handleSuspend]);
+  ], [navigate, language, handleActivate, handleSuspend]);
+
+  const filteredData = useMemo(() => {
+    return doctors.filter((d) => {
+      if (filters.status && (d.status || 'active') !== filters.status) return false;
+      return true;
+    });
+  }, [doctors, filters.status]);
+
+  const filterOptions = [
+    {
+      key: 'status',
+      label: language === 'ar' ? 'الحالة' : 'Status',
+      options: [
+        { value: 'active', label: language === 'ar' ? 'نشط' : 'Active' },
+        { value: 'suspended', label: language === 'ar' ? 'موقوف' : 'Suspended' },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -169,6 +200,8 @@ export default function AdminDoctors() {
         </CardContent>
       </Card>
 
+      <TableReportExportCard reportKey="doctors" data={filteredData} columns={columns} />
+
       {fetchError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -185,12 +218,15 @@ export default function AdminDoctors() {
 
       <DataTable
         columns={columns}
-        data={doctors}
+        data={filteredData}
         searchable
-        searchPlaceholder="Search doctors..."
+        searchPlaceholder={language === 'ar' ? 'البحث في الأطباء...' : 'Search doctors...'}
         loading={loading}
-        emptyTitle="No doctors found."
-        emptyDescription="Add a doctor or adjust your search."
+        emptyTitle={language === 'ar' ? 'لا يوجد أطباء' : 'No doctors found.'}
+        emptyDescription={language === 'ar' ? 'أضف طبيباً أو عدّل الفلاتر.' : 'Add a doctor or adjust your search.'}
+        filters={filterOptions}
+        filterValues={filters}
+        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
       />
     </div>
   );

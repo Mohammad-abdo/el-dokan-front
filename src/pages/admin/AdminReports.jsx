@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import showToast from '@/lib/toast';
-import { Card } from '@/components/ui/card';
+import { extractDataFromResponse } from '@/lib/apiHelper';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   FileText, 
@@ -16,9 +17,16 @@ import {
   Calendar,
   Filter,
   Building2,
+  Table2,
+  ListChecks,
+  FileSpreadsheet,
+  FileDown,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
+import { TABLE_REPORT_TYPES, getReportColumns, getColumnHeader } from '@/lib/reportConfig';
+import { exportReportToExcel } from '@/lib/exportReportExcel';
+import { exportReportToCsv } from '@/lib/reportExport';
 import { 
   BarChart, 
   Bar, 
@@ -46,6 +54,104 @@ export default function AdminReports() {
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0],
   });
+
+  // Table report (استخراج تقارير الجداول)
+  const [tableReportType, setTableReportType] = useState('doctors');
+  const [tableScope, setTableScope] = useState('all');
+  const [tableEntityId, setTableEntityId] = useState('');
+  const [entityList, setEntityList] = useState([]);
+  const [loadingEntities, setLoadingEntities] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState({});
+  const [exportFormat, setExportFormat] = useState('excel');
+
+  const tableReportColumns = useMemo(() => getReportColumns(tableReportType, language), [tableReportType, language]);
+  const tableReportTypeConfig = TABLE_REPORT_TYPES.find((r) => r.key === tableReportType);
+
+  useEffect(() => {
+    if (tableScope !== 'one') {
+      setEntityList([]);
+      setTableEntityId('');
+      return;
+    }
+    setLoadingEntities(true);
+    const config = TABLE_REPORT_TYPES.find((r) => r.key === tableReportType);
+    if (!config) {
+      setLoadingEntities(false);
+      return;
+    }
+    api
+      .get(config.api, { params: config.apiParams || {} })
+      .then((res) => {
+        const data = extractDataFromResponse(res);
+        setEntityList(Array.isArray(data) ? data : []);
+        setTableEntityId('');
+      })
+      .catch(() => setEntityList([]))
+      .finally(() => setLoadingEntities(false));
+  }, [tableReportType, tableScope]);
+
+  useEffect(() => {
+    const defaultCols = {};
+    tableReportColumns.forEach((c) => {
+      defaultCols[c.accessorKey] = true;
+    });
+    setSelectedColumns((prev) => {
+      const next = { ...defaultCols };
+      tableReportColumns.forEach((c) => {
+        if (prev[c.accessorKey] !== undefined) next[c.accessorKey] = prev[c.accessorKey];
+      });
+      return next;
+    });
+  }, [tableReportType]);
+
+  const handleTableExport = async () => {
+    setLoadingExport(true);
+    try {
+      const config = TABLE_REPORT_TYPES.find((r) => r.key === tableReportType);
+      const cols = tableReportColumns.filter((c) => selectedColumns[c.accessorKey]);
+      if (!config || cols.length === 0) {
+        showToast.error(language === 'ar' ? 'اختر نوع التقرير وعموداً واحداً على الأقل' : 'Select report type and at least one column');
+        return;
+      }
+      let data = [];
+      if (tableScope === 'one' && tableEntityId) {
+        data = entityList.filter((e) => String(e.id) === String(tableEntityId));
+      } else {
+        const res = await api.get(config.api, { params: config.apiParams || {} });
+        data = extractDataFromResponse(res);
+      }
+      data = Array.isArray(data) ? data : [];
+      const reportTitle = language === 'ar' ? tableReportTypeConfig?.labelAr : tableReportTypeConfig?.labelEn;
+      const baseFilename = `${tableReportType}-report-${new Date().toISOString().slice(0, 10)}`;
+      if (exportFormat === 'excel') {
+        await exportReportToExcel({
+          reportTitle,
+          columns: cols,
+          data,
+          language,
+          includeMetadata: true,
+          filename: `${baseFilename}.xlsx`,
+        });
+      } else {
+        exportReportToCsv({
+          reportTitle,
+          columns: cols,
+          data,
+          filtersApplied: tableScope === 'one' && tableEntityId ? { [language === 'ar' ? 'السجل' : 'Record']: tableEntityId } : {},
+          language,
+          includeMetadata: true,
+          filename: `${baseFilename}.csv`,
+        });
+      }
+      showToast.success(language === 'ar' ? 'تم استخراج التقرير' : 'Report exported');
+    } catch (e) {
+      console.error(e);
+      showToast.error(e?.message || (language === 'ar' ? 'فشل استخراج التقرير' : 'Export failed'));
+    } finally {
+      setLoadingExport(false);
+    }
+  };
 
   const reportTypes = [
     { 
@@ -389,6 +495,164 @@ export default function AdminReports() {
           {language === 'ar' ? 'إنشاء وعرض التقارير التفصيلية' : 'Generate and view detailed reports'}
         </p>
       </motion.div>
+
+      {/* استخراج تقارير الجداول — نوع التقرير، نطاق، أعمدة، تصدير Excel/CSV */}
+      <Card className="overflow-hidden border-2 border-primary/20 bg-linear-to-br from-card to-primary/5">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <Table2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">
+                {language === 'ar' ? 'استخراج تقرير شامل من الجداول' : 'Export detailed table report'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'ar' ? 'اختر نوع التقرير (طبيب، متجر، شركة، مندوب، سائق) ونطاقه وما تريد تضمينه، ثم حمّل Excel أو CSV' : 'Choose report type, scope, and columns to include, then download as Excel or CSV'}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'نوع التقرير' : 'Report type'}
+              </label>
+              <select
+                value={tableReportType}
+                onChange={(e) => setTableReportType(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {TABLE_REPORT_TYPES.map((r) => (
+                  <option key={r.key} value={r.key}>
+                    {language === 'ar' ? r.labelAr : r.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'نطاق التقرير' : 'Scope'}
+              </label>
+              <div className="flex gap-4 pt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="tableScope"
+                    checked={tableScope === 'all'}
+                    onChange={() => setTableScope('all')}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm">{language === 'ar' ? 'الكل' : 'All'}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="tableScope"
+                    checked={tableScope === 'one'}
+                    onChange={() => setTableScope('one')}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm">{language === 'ar' ? 'سجل واحد' : 'One record'}</span>
+                </label>
+              </div>
+            </div>
+            {tableScope === 'one' && (
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium">
+                  {language === 'ar' ? 'اختر السجل' : 'Select record'}
+                </label>
+                <select
+                  value={tableEntityId}
+                  onChange={(e) => setTableEntityId(e.target.value)}
+                  disabled={loadingEntities}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">
+                    {loadingEntities
+                      ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...')
+                      : (language === 'ar' ? '— اختر —' : '— Select —')}
+                  </option>
+                  {entityList.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name || item.user?.username || item.user?.email || `ID ${item.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium flex items-center gap-1.5">
+              <ListChecks className="h-4 w-4" />
+              {language === 'ar' ? 'ما الذي تريد تضمينه في التقرير؟' : 'What to include in the report?'}
+            </p>
+            <div className="flex flex-wrap gap-3 rounded-lg border bg-muted/30 p-4">
+              {tableReportColumns.map((col) => (
+                <label key={col.accessorKey} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedColumns[col.accessorKey] !== false}
+                    onChange={(e) =>
+                      setSelectedColumns((prev) => ({ ...prev, [col.accessorKey]: e.target.checked }))
+                    }
+                    className="rounded border-input"
+                  />
+                  <span className="text-sm">{getColumnHeader(col, language)}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'تنسيق التحميل' : 'Download format'}
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    checked={exportFormat === 'excel'}
+                    onChange={() => setExportFormat('excel')}
+                    className="rounded-full"
+                  />
+                  <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">{language === 'ar' ? 'Excel (منسق)' : 'Excel (formatted)'}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    checked={exportFormat === 'csv'}
+                    onChange={() => setExportFormat('csv')}
+                    className="rounded-full"
+                  />
+                  <FileDown className="h-4 w-4" />
+                  <span className="text-sm">CSV</span>
+                </label>
+              </div>
+            </div>
+            <Button
+              onClick={handleTableExport}
+              disabled={loadingExport || (tableScope === 'one' && !tableEntityId)}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {loadingExport
+                ? (language === 'ar' ? 'جاري الاستخراج...' : 'Exporting...')
+                : (language === 'ar' ? 'استخراج التقرير' : 'Export report')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">
+        {language === 'ar' ? 'تقارير لوحة التحكم والإحصائيات' : 'Dashboard & statistics reports'}
+      </h2>
 
       {/* Date Range Filter */}
       <Card className="p-6">

@@ -1,11 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
-import { Card } from '@/components/ui/card';
+import { extractDataFromResponse } from '@/lib/apiHelper';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Upload, X, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Upload, X, ImageIcon, Shield } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import showToast from '@/lib/toast';
@@ -18,6 +25,7 @@ export default function AdminUserCreate() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
+  const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -26,8 +34,16 @@ export default function AdminUserCreate() {
     password_confirmation: '',
     avatar_url: '',
     status: 'active',
+    role_names: [],
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    api.get('/admin/roles').then((res) => {
+      const data = extractDataFromResponse(res);
+      setRoles(Array.isArray(data) ? data : []);
+    }).catch(() => setRoles([]));
+  }, []);
 
   const handleImageUpload = async (e) => {
     const file = e?.target?.files?.[0];
@@ -93,6 +109,16 @@ export default function AdminUserCreate() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const toggleRole = (roleName) => {
+    setFormData((prev) => {
+      const current = prev.role_names || [];
+      const next = current.includes(roleName)
+        ? current.filter((r) => r !== roleName)
+        : [...current, roleName];
+      return { ...prev, role_names: next };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -101,9 +127,21 @@ export default function AdminUserCreate() {
     }
 
     setLoading(true);
+    const payload = {
+      username: formData.username,
+      email: formData.email || null,
+      phone: formData.phone,
+      password: formData.password,
+      password_confirmation: formData.password_confirmation,
+      avatar_url: formData.avatar_url || null,
+      status: formData.status,
+    };
+    if (formData.role_names?.length) {
+      payload.role_names = formData.role_names;
+    }
     try {
-      await api.post('/admin/users', formData);
-      showToast.success(language === 'ar' ? 'تم إنشاء المستخدم بنجاح' : 'User created successfully');
+      await api.post('/admin/users', payload);
+      showToast.success(language === 'ar' ? 'تم إنشاء الموظف بنجاح' : 'User created successfully');
       navigate('/admin/users');
     } catch (error) {
       console.error('Error creating user:', error);
@@ -139,10 +177,10 @@ export default function AdminUserCreate() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {language === 'ar' ? 'إنشاء مستخدم جديد' : 'Create New User'}
+            {language === 'ar' ? 'إضافة موظف للوحة التحكم' : 'Add staff to dashboard'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {language === 'ar' ? 'إضافة مستخدم جديد إلى النظام' : 'Add a new user to the system'}
+            {language === 'ar' ? 'إنشاء مستخدم مع أدوار وصلاحيات للمساعدة في إدارة اللوحة' : 'Create a user with roles and permissions to help manage the dashboard'}
           </p>
         </div>
       </motion.div>
@@ -338,7 +376,62 @@ export default function AdminUserCreate() {
             </div>
           </div>
 
-          <div className={`flex gap-2 justify-end ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* الأدوار والصلاحيات */}
+          <div className="border-t pt-6 mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">
+                {language === 'ar' ? 'الأدوار والصلاحيات' : 'Roles & permissions'}
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {language === 'ar' ? 'اختر دوراً أو أكثر لهذا الموظف. الصلاحيات مرتبطة بكل دور.' : 'Select one or more roles for this user. Permissions are tied to each role.'}
+            </p>
+            {roles.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">
+                {language === 'ar' ? 'لا توجد أدوار معرّفة. يمكنك إنشاء أدوار من صفحة الأدوار والصلاحيات.' : 'No roles defined. You can create roles from the Roles & Permissions page.'}
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {roles.map((role) => {
+                  const isChecked = (formData.role_names || []).includes(role.name);
+                  const permCount = role.permissions?.length ?? 0;
+                  return (
+                    <label
+                      key={role.id}
+                      className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${
+                        isChecked ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleRole(role.name)}
+                        className="mt-1 rounded border-input"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium block">
+                          {role.display_name || role.name}
+                        </span>
+                        {role.description && (
+                          <span className="text-xs text-muted-foreground block mt-0.5">
+                            {role.description}
+                          </span>
+                        )}
+                        {permCount > 0 && (
+                          <span className="text-xs text-muted-foreground mt-1 block">
+                            {language === 'ar' ? `${permCount} صلاحية` : `${permCount} permission(s)`}
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className={`flex gap-2 justify-end ${isRTL ? 'flex-row-reverse' : ''} mt-6`}>
             <Button
               type="button"
               variant="outline"

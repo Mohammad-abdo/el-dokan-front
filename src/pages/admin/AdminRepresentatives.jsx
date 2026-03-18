@@ -16,6 +16,7 @@ import { extractDataFromResponse } from '@/lib/apiHelper';
 import showToast from '@/lib/toast';
 import { Plus, UserCheck, UserX, Eye, Edit, MoreHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { TableReportExportCard } from '@/components/TableReportExportCard';
 
 export default function AdminRepresentatives() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function AdminRepresentatives() {
   const [representatives, setRepresentatives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [filters, setFilters] = useState({ status: '' });
 
   useEffect(() => {
     fetchRepresentatives();
@@ -64,11 +66,18 @@ export default function AdminRepresentatives() {
     }
   };
 
+  const statusLabels = useMemo(() => ({
+    approved: language === 'ar' ? 'موافق عليه' : 'Approved',
+    suspended: language === 'ar' ? 'معلق' : 'Suspended',
+    pending: language === 'ar' ? 'قيد الانتظار' : 'Pending',
+  }), [language]);
+
   const columns = useMemo(() => [
     { accessorKey: 'id', header: 'ID' },
     { 
       accessorKey: 'user', 
       header: language === 'ar' ? 'المستخدم' : 'User',
+      getExportValue: (row) => row.user?.username || row.user?.email || '-',
       cell: ({ row }) => row.original.user?.username || row.original.user?.email || '-'
     },
     { 
@@ -78,13 +87,9 @@ export default function AdminRepresentatives() {
     {
       accessorKey: 'status',
       header: language === 'ar' ? 'الحالة' : 'Status',
+      getExportValue: (row) => statusLabels[row.status] || row.status || 'pending',
       cell: ({ row }) => {
         const status = row.original.status || 'pending';
-        const statusLabels = {
-          approved: language === 'ar' ? 'موافق عليه' : 'Approved',
-          suspended: language === 'ar' ? 'معلق' : 'Suspended',
-          pending: language === 'ar' ? 'قيد الانتظار' : 'Pending',
-        };
         return (
           <span className={`px-2 py-1 rounded-full text-xs ${
             status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -132,7 +137,26 @@ export default function AdminRepresentatives() {
         </DropdownMenu>
       ),
     },
-  ], [navigate, language, handleApprove, handleSuspend]);
+  ], [navigate, language, handleApprove, handleSuspend, statusLabels]);
+
+  const filteredData = useMemo(() => {
+    return representatives.filter((r) => {
+      if (filters.status && (r.status || 'pending') !== filters.status) return false;
+      return true;
+    });
+  }, [representatives, filters.status]);
+
+  const filterOptions = [
+    {
+      key: 'status',
+      label: language === 'ar' ? 'الحالة' : 'Status',
+      options: [
+        { value: 'pending', label: statusLabels.pending },
+        { value: 'approved', label: statusLabels.approved },
+        { value: 'suspended', label: statusLabels.suspended },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -155,6 +179,8 @@ export default function AdminRepresentatives() {
         </CardContent>
       </Card>
 
+      <TableReportExportCard reportKey="representatives" data={filteredData} columns={columns} />
+
       {fetchError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -171,12 +197,15 @@ export default function AdminRepresentatives() {
 
       <DataTable
         columns={columns}
-        data={representatives}
+        data={filteredData}
         searchable
-        searchPlaceholder={language === 'ar' ? 'البحث في  مندوبين المبيعات ...' : 'Search representatives...'}
+        searchPlaceholder={language === 'ar' ? 'البحث في مندوبين المبيعات...' : 'Search representatives...'}
         loading={loading}
         emptyTitle={language === 'ar' ? 'لا يوجد مندوبون' : 'No representatives found.'}
-        emptyDescription={language === 'ar' ? 'أضف مندوباً أو عدّل البحث.' : 'Add a representative or adjust your search.'}
+        emptyDescription={language === 'ar' ? 'أضف مندوباً أو عدّل الفلاتر.' : 'Add a representative or adjust your filters.'}
+        filters={filterOptions}
+        filterValues={filters}
+        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import api from '@/lib/api';
 import { extractDataFromResponse } from '@/lib/apiHelper';
 import { Edit, Eye, MoreHorizontal, AlertCircle, RefreshCw, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { TableReportExportCard } from '@/components/TableReportExportCard';
 
 export default function AdminCompanies() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function AdminCompanies() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [filters, setFilters] = useState({ vendor_status: '', is_active: '' });
 
   useEffect(() => {
     fetchCompanies();
@@ -41,12 +43,20 @@ export default function AdminCompanies() {
     }
   };
 
+  const vendorLabels = useMemo(() => ({
+    pending_approval: language === 'ar' ? 'قيد المراجعة' : 'Pending',
+    approved: language === 'ar' ? 'مفعّل' : 'Approved',
+    suspended: language === 'ar' ? 'موقوف' : 'Suspended',
+    rejected: language === 'ar' ? 'مرفوض' : 'Rejected',
+  }), [language]);
+
   const columns = useMemo(() => [
     { accessorKey: 'id', header: 'ID' },
     { accessorKey: 'name', header: language === 'ar' ? 'الاسم' : 'Name' },
     {
       accessorKey: 'user',
       header: language === 'ar' ? 'المستخدم' : 'User',
+      getExportValue: (row) => row.user?.username || row.user?.email || '-',
       cell: ({ row }) => row.original.user?.username || row.original.user?.email || '-'
     },
     { accessorKey: 'category', header: language === 'ar' ? 'الفئة' : 'Category' },
@@ -55,9 +65,10 @@ export default function AdminCompanies() {
     {
       accessorKey: 'vendor_status',
       header: language === 'ar' ? 'حالة الموافقة' : 'Access status',
+      getExportValue: (row) => vendorLabels[row.vendor_status] || row.vendor_status || 'approved',
       cell: ({ row }) => {
         const s = row.original.vendor_status || 'approved';
-        const labels = { pending_approval: language === 'ar' ? 'قيد المراجعة' : 'Pending', approved: language === 'ar' ? 'مفعّل' : 'Approved', suspended: language === 'ar' ? 'موقوف' : 'Suspended', rejected: language === 'ar' ? 'مرفوض' : 'Rejected' };
+        const labels = vendorLabels;
         const classes = { pending_approval: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', suspended: 'bg-red-100 text-red-800', rejected: 'bg-gray-100 text-gray-800' };
         return <span className={`px-2 py-1 rounded-full text-xs ${classes[s] || 'bg-gray-100 text-gray-800'}`}>{labels[s] || s}</span>;
       },
@@ -65,11 +76,13 @@ export default function AdminCompanies() {
     {
       accessorKey: 'company_plan',
       header: language === 'ar' ? 'الخطة' : 'Plan',
+      getExportValue: (row) => row.company_plan?.name_ar || row.company_plan?.name || '—',
       cell: ({ row }) => row.original.company_plan?.name_ar || row.original.company_plan?.name || '—',
     },
     {
       accessorKey: 'is_active',
       header: language === 'ar' ? 'الحالة' : 'Status',
+      getExportValue: (row) => row.is_active !== false ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive'),
       cell: ({ row }) => (
         <span className={`px-2 py-1 rounded-full text-xs ${
           row.original.is_active !== false ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -102,7 +115,40 @@ export default function AdminCompanies() {
         </DropdownMenu>
       ),
     },
-  ], [navigate, language]);
+  ], [navigate, language, vendorLabels]);
+
+  const filteredData = useMemo(() => {
+    return companies.filter((c) => {
+      if (filters.vendor_status && (c.vendor_status || 'approved') !== filters.vendor_status) return false;
+      if (filters.is_active !== '') {
+        const active = c.is_active !== false;
+        if (filters.is_active === '1' && !active) return false;
+        if (filters.is_active === '0' && active) return false;
+      }
+      return true;
+    });
+  }, [companies, filters.vendor_status, filters.is_active]);
+
+  const filterOptions = [
+    {
+      key: 'vendor_status',
+      label: language === 'ar' ? 'حالة الموافقة' : 'Access status',
+      options: [
+        { value: 'pending_approval', label: vendorLabels.pending_approval },
+        { value: 'approved', label: vendorLabels.approved },
+        { value: 'suspended', label: vendorLabels.suspended },
+        { value: 'rejected', label: vendorLabels.rejected },
+      ],
+    },
+    {
+      key: 'is_active',
+      label: language === 'ar' ? 'الحالة' : 'Status',
+      options: [
+        { value: '1', label: language === 'ar' ? 'نشط' : 'Active' },
+        { value: '0', label: language === 'ar' ? 'غير نشط' : 'Inactive' },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -131,6 +177,8 @@ export default function AdminCompanies() {
         </CardContent>
       </Card>
 
+      <TableReportExportCard reportKey="companies" data={filteredData} columns={columns} />
+
       {fetchError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -147,12 +195,15 @@ export default function AdminCompanies() {
 
       <DataTable
         columns={columns}
-        data={companies}
+        data={filteredData}
         loading={loading}
         searchable
         searchPlaceholder={language === 'ar' ? 'بحث...' : 'Search...'}
         emptyTitle={language === 'ar' ? 'لا توجد شركات' : 'No companies found'}
         emptyDescription={language === 'ar' ? 'الشركات ستظهر هنا.' : 'Companies will appear here.'}
+        filters={filterOptions}
+        filterValues={filters}
+        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
       />
     </div>
   );

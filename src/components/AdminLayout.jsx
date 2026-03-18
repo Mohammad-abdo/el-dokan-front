@@ -349,13 +349,17 @@ function SidebarLogo({ isRTL }) {
         .catch(() => {});
     }
 
-    // Listen for logo updates
-    const handleStorageChange = () => {
+    // Listen for logo updates (from Settings page in same tab)
+    const handleSettingsUpdated = () => {
       const newLogo = localStorage.getItem("site_logo");
-      if (newLogo) setLogoUrl(newLogo);
+      setLogoUrl(newLogo || "");
     };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("site-settings-updated", handleSettingsUpdated);
+    window.addEventListener("storage", handleSettingsUpdated);
+    return () => {
+      window.removeEventListener("site-settings-updated", handleSettingsUpdated);
+      window.removeEventListener("storage", handleSettingsUpdated);
+    };
   }, []);
 
   return (
@@ -363,17 +367,17 @@ function SidebarLogo({ isRTL }) {
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ type: "spring", delay: 0.2 }}
-      className="flex items-center gap-2"
+      className="flex items-center gap-3 min-w-0"
     >
       {logoUrl ? (
         <img
           src={logoUrl}
-          alt="Logo"
-          className="h-10 w-auto object-contain max-w-[120px]"
+          alt="الدكان"
+          className="h-12 w-auto object-contain max-w-[160px] shrink-0"
           onError={() => setLogoUrl("")}
         />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+        <div className="w-12 h-12 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
           <svg
             width="24"
             height="24"
@@ -405,7 +409,7 @@ function SidebarLogo({ isRTL }) {
         </div>
       )}
       <span
-        className="font-bold text-lg"
+        className="font-bold text-xl shrink-0"
         style={{
           backgroundImage: `linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / 0.6))`,
           WebkitBackgroundClip: "text",
@@ -507,7 +511,6 @@ function SidebarContent({
             { label: t("sidebar.addDriver"), path: "/admin/drivers/new" },
           ],
         },
-        { icon: MapPin, label: t("sidebar.deliveries"), path: "/admin/deliveries" },
         { icon: UserCheck, label: t("sidebar.representatives"), path: "/admin/representatives" },
         { icon: Calendar, label: t("sidebar.visits"), path: "/admin/visits" },
       ],
@@ -542,6 +545,7 @@ function SidebarContent({
       sectionKey: "sidebar.sectionSystem",
       items: [
         { icon: Shield, label: t("sidebar.rolesPermissions"), path: "/admin/roles" },
+        { icon: Mail, label: t("sidebar.messages"), path: "/admin/messages" },
         { icon: MessageSquare, label: t("sidebar.support"), path: "/admin/support" },
         { icon: Upload, label: t("sidebar.fileUploads"), path: "/admin/file-uploads" },
         { icon: Settings, label: t("common.settings"), path: "/admin/settings" },
