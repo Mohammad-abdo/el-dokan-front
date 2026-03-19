@@ -46,7 +46,20 @@ function triggerDownload(blob, filename) {
  * Hook for generating doctor reports with preview, generate, and
  * persistent filter support.
  */
-export function useGenerateReport() {
+export function useGenerateReport(language = 'en') {
+  // Keep translations local to this hook because validation/toast messages
+  // are shown inside the report modal.
+  const isAr = language === 'ar';
+  const i18n = {
+    selectSections: isAr ? 'اختر قسمًا واحدًا على الأقل.' : 'Select at least one section.',
+    dateFromRequired: isAr ? 'تاريخ البدء مطلوب.' : 'Start date is required.',
+    dateToRequired: isAr ? 'تاريخ الانتهاء مطلوب.' : 'End date is required.',
+    dateToAfterFrom: isAr ? 'تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.' : 'End date must be after start date.',
+    previewFailed: isAr ? 'فشل تحميل المعاينة.' : 'Failed to load preview.',
+    generateFailed: isAr ? 'فشل إنشاء التقرير.' : 'Failed to generate report.',
+    downloadedAs: (filename) => (isAr ? `تم تنزيل التقرير باسم ${filename}` : `Report downloaded as ${filename}`),
+  };
+
   const saved = loadSavedFilters();
   const defaults = getDefaultDateRange();
 
@@ -77,16 +90,16 @@ export function useGenerateReport() {
   const validate = useCallback(() => {
     const errs = {};
     if (reportType === 'custom' && sections.length === 0) {
-      errs.sections = 'Select at least one section.';
+      errs.sections = i18n.selectSections;
     }
-    if (!dateFrom) errs.date_from = 'Start date is required.';
-    if (!dateTo)   errs.date_to   = 'End date is required.';
+    if (!dateFrom) errs.date_from = i18n.dateFromRequired;
+    if (!dateTo)   errs.date_to   = i18n.dateToRequired;
     if (dateFrom && dateTo && dateFrom > dateTo) {
-      errs.date_to = 'End date must be after start date.';
+      errs.date_to = i18n.dateToAfterFrom;
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [reportType, sections, dateFrom, dateTo]);
+  }, [reportType, sections, dateFrom, dateTo, i18n.selectSections, i18n.dateFromRequired, i18n.dateToRequired, i18n.dateToAfterFrom]);
 
   const buildParams = useCallback(
     (doctorId, overrideFormat) => ({
@@ -109,12 +122,12 @@ export function useGenerateReport() {
         const result = await previewDoctorReport(buildParams(doctorId, 'json'));
         setPreviewData(result.data ?? null);
       } catch (err) {
-        showToast.error(err?.response?.data?.message ?? 'Failed to load preview.');
+        showToast.error(err?.response?.data?.message ?? i18n.previewFailed);
       } finally {
         setPreviewing(false);
       }
     },
-    [buildParams, validate]
+    [buildParams, validate, i18n.previewFailed]
   );
 
   const generate = useCallback(
@@ -125,17 +138,17 @@ export function useGenerateReport() {
         const params = buildParams(doctorId);
         const { blob, filename } = await generateDoctorReport(params);
         triggerDownload(blob, filename);
-        showToast.success(`Report downloaded as ${filename}`);
+        showToast.success(i18n.downloadedAs(filename));
         return true;
       } catch (err) {
-        const msg = err?.response?.data?.message ?? 'Failed to generate report.';
+        const msg = err?.response?.data?.message ?? i18n.generateFailed;
         showToast.error(msg);
         return false;
       } finally {
         setGenerating(false);
       }
     },
-    [buildParams, validate]
+    [buildParams, validate, i18n.generateFailed]
   );
 
   const reset = useCallback(() => {

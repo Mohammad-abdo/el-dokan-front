@@ -1,11 +1,25 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-const Dialog = ({ open, onOpenChange, children, ...props }) => {
+const Dialog = ({
+  open,
+  onOpenChange,
+  children,
+  position = "center",
+  topOffset = 0,
+  zIndex = "z-50",
+  ...props
+}) => {
   if (!open) return null;
 
+  const isTop = position === "top";
+  const wrapperAlign = isTop ? "items-start" : "items-center";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className={`fixed inset-0 flex justify-center ${wrapperAlign} ${zIndex}`}
+      style={isTop ? { paddingTop: topOffset } : undefined}
+    >
       <div 
         className="fixed inset-0 bg-black/50" 
         onClick={() => onOpenChange?.(false)}

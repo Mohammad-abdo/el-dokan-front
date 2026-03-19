@@ -305,6 +305,13 @@ export default function AdminDoctors() {
         </Alert>
       )}
 
+      {/* ── Report modal ── */}
+      <DoctorReportModal
+        open={reportModalOpen}
+        onOpenChange={setReportModalOpen}
+        doctor={selectedDoctor}
+      />
+
       {/* ── Doctors table ── */}
       <DataTable
         columns={columns}
@@ -317,13 +324,6 @@ export default function AdminDoctors() {
         filters={filterOptions}
         filterValues={filters}
         onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-      />
-
-      {/* ── Report modal ── */}
-      <DoctorReportModal
-        open={reportModalOpen}
-        onOpenChange={setReportModalOpen}
-        doctor={selectedDoctor}
       />
     </div>
   );
