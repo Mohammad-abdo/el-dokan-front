@@ -28,6 +28,7 @@ import {
   CalendarDays,
   FileText,
 } from 'lucide-react';
+import DoctorReportModal from '@/components/reports/DoctorReportModal';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import showToast from '@/lib/toast';
@@ -62,6 +63,7 @@ export default function AdminDoctorDetail() {
   const [prescriptionsPagination, setPrescriptionsPagination] = useState({ total: 0, current_page: 1, last_page: 1 });
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const isRTL = language === 'ar';
 
@@ -316,6 +318,10 @@ export default function AdminDoctorDetail() {
           <Button variant="outline" size="sm" onClick={() => navigate(`/admin/doctors/${id}/wallet`)} className="gap-2">
             <Wallet className="w-4 h-4" />
             {t('Wallet', 'المحفظة')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setReportModalOpen(true)} className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50">
+            <FileText className="w-4 h-4" />
+            {t('Report', 'تقرير')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigate(`/admin/doctors/${id}/edit`)} className="gap-2">
             <Edit className="w-4 h-4" />
@@ -960,6 +966,12 @@ export default function AdminDoctorDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <DoctorReportModal
+        open={reportModalOpen}
+        onOpenChange={setReportModalOpen}
+        doctor={doctor}
+      />
     </div>
   );
 }
