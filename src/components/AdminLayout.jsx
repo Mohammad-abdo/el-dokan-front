@@ -466,6 +466,7 @@ function SidebarContent({
             { label: t("sidebar.addUser"), path: "/admin/users/create" },
           ],
         },
+        { icon: Calendar, label: t("sidebar.visits"), path: "/admin/visits" },
         { icon: ShoppingCart, label: t("sidebar.orders"), path: "/admin/orders" },
         { icon: Package, label: t("sidebar.availableOrders"), path: "/admin/available-orders" },
         { icon: MapPin, label: t("sidebar.deliveries"), path: "/admin/deliveries" },
@@ -512,7 +513,6 @@ function SidebarContent({
           ],
         },
         { icon: UserCheck, label: t("sidebar.representatives"), path: "/admin/representatives" },
-        { icon: Calendar, label: t("sidebar.visits"), path: "/admin/visits" },
       ],
     },
     {

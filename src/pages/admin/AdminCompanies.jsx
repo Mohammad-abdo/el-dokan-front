@@ -12,9 +12,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import api from '@/lib/api';
 import { extractDataFromResponse } from '@/lib/apiHelper';
-import { AlertCircle, RefreshCw, Plus, Edit, Eye, MoreHorizontal } from 'lucide-react';
+import { AlertCircle, RefreshCw, Plus, Edit, Eye, MoreHorizontal, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { TableReportExportCard } from '@/components/TableReportExportCard';
+import CompanyReportModal from '@/components/reports/CompanyReportModal';
 
 export default function AdminCompanies() {
   const navigate = useNavigate();
@@ -23,6 +23,8 @@ export default function AdminCompanies() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [filters, setFilters] = useState({ vendor_status: '', is_active: '' });
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedCompanyForReport, setSelectedCompanyForReport] = useState(null);
 
   useEffect(() => {
     fetchCompanies();
@@ -108,6 +110,16 @@ export default function AdminCompanies() {
               <Eye className="mr-2 h-4 w-4" />
               {language === 'ar' ? 'عرض' : 'View'}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e?.stopPropagation?.();
+                setSelectedCompanyForReport(row.original);
+                setReportModalOpen(true);
+              }}
+            >
+              <FileText className="mr-2 h-4 w-4 text-blue-600" />
+              {language === 'ar' ? 'تقرير الشركة' : 'Company report'}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/admin/companies/${row.original.id}/edit`)}>
               <Edit className="mr-2 h-4 w-4" />
               {language === 'ar' ? 'تعديل' : 'Edit'}
@@ -165,6 +177,17 @@ export default function AdminCompanies() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedCompanyForReport(null);
+                  setReportModalOpen(true);
+                }}
+                className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+              >
+                <FileText className="h-4 w-4" />
+                {language === 'ar' ? 'إنشاء تقرير' : 'Generate Report'}
+              </Button>
               <Button onClick={() => navigate('/admin/companies/new')} className="gap-2">
                 <Plus className="h-4 w-4" />
                 {language === 'ar' ? 'إضافة شركة' : 'Add company'}
@@ -178,11 +201,12 @@ export default function AdminCompanies() {
         </CardContent>
       </Card>
 
-      <TableReportExportCard
-        reportKey="companies"
-        data={filteredData}
-        columns={columns}
-        detailRoute={(id) => `/admin/companies/${id}/report`}
+      {/* Report modal (same pattern as doctors/shops) */}
+      <CompanyReportModal
+        open={reportModalOpen}
+        onOpenChange={setReportModalOpen}
+        company={selectedCompanyForReport}
+        companies={filteredData}
       />
 
       <DataTable
