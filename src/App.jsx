@@ -55,6 +55,8 @@ import AdminRepresentativeEdit from "./pages/admin/AdminRepresentativeEdit";
 import AdminRepresentativeDetail from "./pages/admin/AdminRepresentativeDetail";
 import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminExport from "./pages/admin/AdminExport";
+import AdminCompanyReportDetail from "./pages/admin/AdminCompanyReportDetail";
 import AdminRoles from "./pages/admin/AdminRoles";
 import AdminMaps from "./pages/admin/AdminMaps";
 import AdminDrivers from "./pages/admin/AdminDrivers";
@@ -599,6 +601,26 @@ function AppRoutes() {
           <ProtectedRoute requireAdmin>
             <AdminLayout>
               <AdminReports />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/export"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminExport />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/companies/:id/report"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout>
+              <AdminCompanyReportDetail />
             </AdminLayout>
           </ProtectedRoute>
         }

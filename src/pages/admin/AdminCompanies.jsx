@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import api from '@/lib/api';
 import { extractDataFromResponse } from '@/lib/apiHelper';
-import { Edit, Eye, MoreHorizontal, AlertCircle, RefreshCw, Plus } from 'lucide-react';
+import { AlertCircle, RefreshCw, Plus, Edit, Eye, MoreHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TableReportExportCard } from '@/components/TableReportExportCard';
 
@@ -30,6 +30,7 @@ export default function AdminCompanies() {
 
   const fetchCompanies = async () => {
     setFetchError(null);
+    setLoading(true);
     try {
       const response = await api.get('/admin/shops', { params: { type: 'company' } });
       const data = extractDataFromResponse(response);
@@ -177,7 +178,25 @@ export default function AdminCompanies() {
         </CardContent>
       </Card>
 
-      <TableReportExportCard reportKey="companies" data={filteredData} columns={columns} />
+      <TableReportExportCard
+        reportKey="companies"
+        data={filteredData}
+        columns={columns}
+        detailRoute={(id) => `/admin/companies/${id}/report`}
+      />
+
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+        searchable
+        searchPlaceholder={language === 'ar' ? 'بحث...' : 'Search...'}
+        emptyTitle={language === 'ar' ? 'لا توجد شركات' : 'No companies found'}
+        emptyDescription={language === 'ar' ? 'الشركات ستظهر هنا.' : 'Companies will appear here.'}
+        filters={filterOptions}
+        filterValues={filters}
+        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+      />
 
       {fetchError && (
         <Alert variant="destructive">
@@ -193,18 +212,6 @@ export default function AdminCompanies() {
         </Alert>
       )}
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        loading={loading}
-        searchable
-        searchPlaceholder={language === 'ar' ? 'بحث...' : 'Search...'}
-        emptyTitle={language === 'ar' ? 'لا توجد شركات' : 'No companies found'}
-        emptyDescription={language === 'ar' ? 'الشركات ستظهر هنا.' : 'Companies will appear here.'}
-        filters={filterOptions}
-        filterValues={filters}
-        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-      />
     </div>
   );
 }
