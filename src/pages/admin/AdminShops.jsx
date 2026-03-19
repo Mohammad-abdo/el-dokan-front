@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import api from '@/lib/api';
 import { extractDataFromResponse } from '@/lib/apiHelper';
-import { Plus, Edit, Eye, MoreHorizontal, AlertCircle, RefreshCw, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Eye, MoreHorizontal, AlertCircle, RefreshCw, CheckCircle, FileText } from 'lucide-react';
 import showToast from '@/lib/toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { TableReportExportCard } from '@/components/TableReportExportCard';
+import ShopReportModal from '@/components/reports/ShopReportModal';
 
 export default function AdminShops() {
   const navigate = useNavigate();
@@ -24,6 +24,8 @@ export default function AdminShops() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [filters, setFilters] = useState({ vendor_status: '', is_active: '' });
+  const [shopReportOpen, setShopReportOpen] = useState(false);
+  const [selectedShopForReport, setSelectedShopForReport] = useState(null);
 
   useEffect(() => {
     fetchShops();
@@ -33,7 +35,15 @@ export default function AdminShops() {
     setFetchError(null);
     try {
       const response = await api.get('/admin/shops');
-      setShops(extractDataFromResponse(response));
+      const data = extractDataFromResponse(response) ?? [];
+      // The /admin/shops API may return "companies" as well.
+      // For this page we want to show "shops" only.
+      const onlyShops = data.filter((s) => {
+        const category = s?.category;
+        const isCompanyFlag = s?.is_company === true || s?.is_company === 1;
+        return !(isCompanyFlag || category === 'company');
+      });
+      setShops(onlyShops);
     } catch (error) {
       console.error('Error fetching shops:', error);
       setShops([]);
@@ -115,6 +125,16 @@ export default function AdminShops() {
                   {language === 'ar' ? 'موافقة' : 'Approve'}
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e?.stopPropagation?.();
+                  setSelectedShopForReport(shop);
+                  setShopReportOpen(true);
+                }}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                {language === 'ar' ? 'تقرير المتجر' : 'Generate report'}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate(`/admin/shops/${shop.id}`)}>
                 <Eye className="mr-2 h-4 w-4" />
                 {language === 'ar' ? 'عرض' : 'View'}
@@ -128,7 +148,7 @@ export default function AdminShops() {
         );
       },
     },
-  ], [navigate, language, fetchShops, vendorLabels]);
+  ], [navigate, language, fetchShops, vendorLabels, setSelectedShopForReport, setShopReportOpen]);
 
   const filteredData = useMemo(() => {
     return shops.filter((s) => {
@@ -165,6 +185,7 @@ export default function AdminShops() {
 
   return (
     <div className="space-y-6">
+      {/* ── Page header ── */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -174,17 +195,34 @@ export default function AdminShops() {
               </h1>
               <p className="text-muted-foreground mt-1">
                 {language === 'ar' ? 'إدارة جميع المتاجر' : 'Manage all shops'}
+                {!loading && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                    {filteredData.length}
+                  </span>
+                )}
               </p>
             </div>
-            <Button onClick={() => navigate('/admin/shops/new')}>
-              <Plus className="w-4 h-4 mr-2" />
-              {language === 'ar' ? 'إضافة متجر' : 'Add Shop'}
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                onClick={() => {
+                  setSelectedShopForReport(null);
+                  setShopReportOpen(true);
+                }}
+              >
+                <FileText className="h-4 w-4" />
+                {language === 'ar' ? 'إنشاء تقرير' : 'Generate Report'}
+              </Button>
+              <Button onClick={() => navigate('/admin/shops/new')}>
+                <Plus className="w-4 h-4 mr-2" />
+                {language === 'ar' ? 'إضافة متجر' : 'Add Shop'}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
-
-      <TableReportExportCard reportKey="shops" data={filteredData} columns={columns} />
 
       {fetchError && (
         <Alert variant="destructive">
@@ -199,6 +237,14 @@ export default function AdminShops() {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* ── Report modal ── */}
+      <ShopReportModal
+        open={shopReportOpen}
+        onOpenChange={setShopReportOpen}
+        shop={selectedShopForReport}
+        shops={shops}
+      />
 
       <DataTable
         columns={columns}
